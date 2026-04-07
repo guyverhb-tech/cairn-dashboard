@@ -23,7 +23,7 @@ export interface Signal {
   sourceName: string;
   sourceUrl: string;
   timestamp: string;
-  vertical: 'finserv' | 'healthcare';
+  vertical: 'finserv' | 'healthcare' | 'retail';
   geography: 'uk' | 'france' | 'germany' | 'netherlands' | 'ireland' | 'switzerland' | 'spain' | 'italy' | 'sweden';
   signalType: string;
   title: string;
@@ -39,7 +39,7 @@ export interface Signal {
 
 export interface Trend {
   id: string;
-  vertical: 'finserv' | 'healthcare';
+  vertical: 'finserv' | 'healthcare' | 'retail';
   geography: 'uk' | 'france' | 'germany' | 'netherlands' | 'ireland' | 'switzerland' | 'spain' | 'italy' | 'sweden';
   title: string;
   narrative: string;

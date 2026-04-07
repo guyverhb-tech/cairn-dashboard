@@ -24,6 +24,7 @@ function VerticalBadge({ vertical }: { vertical: string }) {
   const colors: Record<string, string> = {
     finserv: 'bg-blue-100 text-blue-800',
     healthcare: 'bg-green-100 text-green-800',
+    retail: 'bg-purple-100 text-purple-800',
   };
   return (
     <Badge variant="outline" className={colors[vertical] || ''}>
