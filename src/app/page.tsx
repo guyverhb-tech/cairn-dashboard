@@ -19,6 +19,20 @@ const regionCountries: Record<string, string[]> = {
   apj: ['australia', 'japan', 'singapore', 'india'],
 };
 
+function formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return 'Yesterday';
+  return `${diffDays}d ago`;
+}
+
 function formatCountryStats(stats: Record<string, number> | undefined, region: string): string {
   if (!stats) return 'No data';
 
@@ -89,6 +103,14 @@ export default async function Dashboard({
     getSignals({ limit: 100 }),
     getTrends(),
   ]);
+
+  // Get most recent signal timestamp for "Last updated"
+  const mostRecentSignal = signalsData.signals.length > 0
+    ? signalsData.signals.reduce((latest, signal) =>
+        new Date(signal.timestamp) > new Date(latest.timestamp) ? signal : latest
+      )
+    : null;
+  const lastUpdated = mostRecentSignal ? mostRecentSignal.timestamp : null;
 
   const dateFilter = getDateRangeFilter(selectedDateRange);
 
@@ -162,15 +184,35 @@ export default async function Dashboard({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          {/* Region Selector */}
-          <div className="flex flex-wrap gap-2 mb-4">
+      <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          {/* Title row */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold text-gray-900">Cairn Intelligence</h1>
+              <span className="text-gray-300">|</span>
+              <p className="text-gray-600 text-sm">
+                {selectedRegion === 'all'
+                  ? 'Global View'
+                  : `${selectedRegion.toUpperCase()} Region`}
+              </p>
+            </div>
+            {lastUpdated && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span className="text-gray-500">Updated {formatRelativeTime(lastUpdated)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Region Selector - prominent row */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500 mr-1">Region:</span>
             <Link
               href="?region=all"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedRegion === 'all'
-                  ? 'bg-gray-900 text-white'
+                  ? 'bg-gray-900 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -178,9 +220,9 @@ export default async function Dashboard({
             </Link>
             <Link
               href="?region=emea"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedRegion === 'emea'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-300'
                   : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
               }`}
             >
@@ -188,9 +230,9 @@ export default async function Dashboard({
             </Link>
             <Link
               href="?region=namer"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedRegion === 'namer'
-                  ? 'bg-orange-600 text-white'
+                  ? 'bg-orange-600 text-white shadow-md ring-2 ring-orange-300'
                   : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
               }`}
             >
@@ -198,22 +240,15 @@ export default async function Dashboard({
             </Link>
             <Link
               href="?region=apj"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedRegion === 'apj'
-                  ? 'bg-teal-600 text-white'
+                  ? 'bg-teal-600 text-white shadow-md ring-2 ring-teal-300'
                   : 'bg-teal-50 text-teal-700 hover:bg-teal-100'
               }`}
             >
               {'\u{1F30F}'} APJ
             </Link>
           </div>
-
-          <h1 className="text-2xl font-bold text-gray-900">Cairn Intelligence</h1>
-          <p className="text-gray-600">
-            {selectedRegion === 'all'
-              ? 'Global Enterprise Strategy Dashboard'
-              : `${selectedRegion.toUpperCase()} Enterprise Strategy Dashboard`}
-          </p>
         </div>
       </header>
 
@@ -268,7 +303,9 @@ export default async function Dashboard({
               <CardTitle className="text-3xl">{trendStats.confirmed + trendStats.weakened}</CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-gray-500">
-              Confirmed: {trendStats.confirmed} | Weakened: {trendStats.weakened}
+              <span className="text-green-600">{trendStats.confirmed} Confirmed</span>
+              {' | '}
+              <span className="text-amber-600">{trendStats.weakened} Under Review</span>
             </CardContent>
           </Card>
         </div>

@@ -81,12 +81,17 @@ function GeographyBadge({ geography }: { geography: string }) {
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     confirmed: 'bg-green-100 text-green-800',
-    weakened: 'bg-yellow-100 text-yellow-800',
+    weakened: 'bg-amber-100 text-amber-800',
     rejected: 'bg-red-100 text-red-800',
+  };
+  const labels: Record<string, string> = {
+    confirmed: 'Confirmed',
+    weakened: 'Under Review',
+    rejected: 'Rejected',
   };
   return (
     <Badge variant="outline" className={colors[status] || ''}>
-      {status}
+      {labels[status] || status}
     </Badge>
   );
 }
@@ -95,6 +100,26 @@ function CrossRegionBadge() {
   return (
     <Badge variant="outline" className="bg-gradient-to-r from-indigo-100 via-orange-100 to-teal-100 text-gray-800 border-2">
       {'\u{1F310}'} Cross-Region
+    </Badge>
+  );
+}
+
+function ConfidenceBadge({ score }: { score: number }) {
+  const percentage = Math.round(score * 100);
+  let colorClass = 'bg-red-100 text-red-800 border-red-300';
+  let label = 'Low';
+
+  if (percentage >= 70) {
+    colorClass = 'bg-green-100 text-green-800 border-green-300';
+    label = 'High';
+  } else if (percentage >= 40) {
+    colorClass = 'bg-amber-100 text-amber-800 border-amber-300';
+    label = 'Medium';
+  }
+
+  return (
+    <Badge variant="outline" className={colorClass}>
+      {percentage}% {label}
     </Badge>
   );
 }
@@ -111,7 +136,7 @@ export function DashboardTabs({
   const [digest, setDigest] = useState<RegionDigest | null>(null);
   const [digestLoading, setDigestLoading] = useState(false);
   const [digestError, setDigestError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('trends');
+  const [activeTab, setActiveTab] = useState('digest');
 
   async function loadDigest(refresh = false) {
     setDigestLoading(true);
@@ -188,7 +213,20 @@ export function DashboardTabs({
           </CardHeader>
           <CardContent>
             {trends.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No trends detected yet</p>
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Building Intelligence</h3>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  Cairn is accumulating signals for this region. Trend analysis will appear once sufficient data has been gathered across multiple ingestion cycles.
+                </p>
+                <p className="text-sm text-gray-400 mt-4">
+                  {signals.length} signal{signals.length !== 1 ? 's' : ''} collected so far
+                </p>
+              </div>
             ) : (
               <div className="space-y-4">
                 {trends.map((trend) => (
@@ -204,11 +242,9 @@ export function DashboardTabs({
                           <VerticalBadge vertical={trend.vertical} />
                           <GeographyBadge geography={trend.geography} />
                           <StatusBadge status={trend.status} />
-                          <Badge variant="outline">
-                            {(trend.confidenceScore * 100).toFixed(0)}% confidence
-                          </Badge>
+                          <ConfidenceBadge score={trend.confidenceScore} />
                         </div>
-                        <CardTitle className="text-lg">{trend.title}</CardTitle>
+                        <CardTitle className="text-lg line-clamp-2" title={trend.title}>{trend.title}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-gray-600 text-sm line-clamp-2">{trend.narrative}</p>

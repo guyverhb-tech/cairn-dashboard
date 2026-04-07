@@ -9,8 +9,13 @@ export default async function TrendPage({ params }: { params: Promise<{ id: stri
 
   const statusColors: Record<string, string> = {
     confirmed: 'bg-green-100 text-green-800',
-    weakened: 'bg-yellow-100 text-yellow-800',
+    weakened: 'bg-amber-100 text-amber-800',
     rejected: 'bg-red-100 text-red-800',
+  };
+  const statusLabels: Record<string, string> = {
+    confirmed: 'Confirmed',
+    weakened: 'Under Review',
+    rejected: 'Rejected',
   };
 
   return (
@@ -35,10 +40,21 @@ export default async function TrendPage({ params }: { params: Promise<{ id: stri
                 {trend.geography.toUpperCase()}
               </Badge>
               <Badge variant="outline" className={statusColors[trend.status]}>
-                {trend.status}
+                {statusLabels[trend.status] || trend.status}
               </Badge>
-              <Badge variant="outline">
-                {(trend.confidenceScore * 100).toFixed(0)}% confidence
+              <Badge
+                variant="outline"
+                className={
+                  trend.confidenceScore >= 0.7
+                    ? 'bg-green-100 text-green-800 border-green-300'
+                    : trend.confidenceScore >= 0.4
+                    ? 'bg-amber-100 text-amber-800 border-amber-300'
+                    : 'bg-red-100 text-red-800 border-red-300'
+                }
+              >
+                {(trend.confidenceScore * 100).toFixed(0)}% {
+                  trend.confidenceScore >= 0.7 ? 'High' : trend.confidenceScore >= 0.4 ? 'Medium' : 'Low'
+                }
               </Badge>
             </div>
             <CardTitle className="text-xl">{trend.title}</CardTitle>

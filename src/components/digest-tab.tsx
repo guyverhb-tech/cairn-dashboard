@@ -118,7 +118,19 @@ function DigestCardComponent({
                 >
                   <p className="font-medium text-gray-900">{trend.title}</p>
                   <p className="text-gray-500 text-xs mt-1">
-                    {trend.status} • {(trend.confidenceScore * 100).toFixed(0)}% confidence
+                    <span className={
+                      trend.status === 'confirmed' ? 'text-green-600' :
+                      trend.status === 'weakened' ? 'text-amber-600' : 'text-red-600'
+                    }>
+                      {trend.status === 'weakened' ? 'Under Review' : trend.status}
+                    </span>
+                    {' • '}
+                    <span className={
+                      trend.confidenceScore >= 0.7 ? 'text-green-600' :
+                      trend.confidenceScore >= 0.4 ? 'text-amber-600' : 'text-red-600'
+                    }>
+                      {(trend.confidenceScore * 100).toFixed(0)}% confidence
+                    </span>
                   </p>
                 </div>
               ))}
@@ -160,7 +172,7 @@ function BriefingModal({
     const content = type === 'markdown' ? briefing.markdown : briefing.content;
     navigator.clipboard.writeText(content);
     setCopied(type);
-    setTimeout(() => setCopied(null), 2000);
+    setTimeout(() => setCopied(null), 3000);
   }
 
   return (
@@ -207,28 +219,42 @@ function BriefingModal({
 
         {briefing && (
           <div className="space-y-4">
+            {/* Copy success toast */}
+            {copied && (
+              <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="font-medium">
+                  {copied === 'text' ? 'Plain text copied to clipboard!' : 'Markdown copied to clipboard!'}
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
                 {briefing.wordCount} words • Generated {new Date(briefing.generatedAt).toLocaleString()}
               </div>
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
+                  variant={copied === 'text' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => copyToClipboard('text')}
+                  className={copied === 'text' ? 'bg-green-600 hover:bg-green-700' : ''}
                 >
                   {copied === 'text' ? 'Copied!' : 'Copy Plain Text'}
                 </Button>
                 <Button
-                  variant="outline"
+                  variant={copied === 'markdown' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => copyToClipboard('markdown')}
+                  className={copied === 'markdown' ? 'bg-green-600 hover:bg-green-700' : ''}
                 >
-                  {copied === 'markdown' ? 'Copied!' : 'Copy as Markdown'}
+                  {copied === 'markdown' ? 'Copied!' : 'Copy Markdown'}
                 </Button>
               </div>
             </div>
-            <pre className="bg-gray-50 border rounded-lg p-4 text-sm font-mono whitespace-pre-wrap overflow-x-auto">
+            <pre className="bg-gray-50 border rounded-lg p-4 text-sm font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
               {briefing.content}
             </pre>
           </div>
@@ -253,13 +279,51 @@ export function DigestTab({
 }) {
   if (loading) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Generating digest...</p>
-          <p className="text-sm text-gray-500 mt-2">This synthesizes all trends using AI analysis.</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-2"></div>
+            <div className="h-4 w-64 bg-gray-100 rounded animate-pulse"></div>
+          </div>
+          <div className="flex gap-2">
+            <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Loading indicator */}
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="py-8 text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+              <p className="text-blue-700 font-medium">Generating analysis...</p>
+            </div>
+            <p className="text-sm text-blue-600">Synthesizing trends using AI. This may take 15-30 seconds.</p>
+          </CardContent>
+        </Card>
+
+        {/* Card skeletons */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="border-2 border-dashed border-gray-200">
+              <CardHeader className="pb-3">
+                <div className="flex gap-2 mb-2">
+                  <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-5 w-16 bg-gray-100 rounded animate-pulse"></div>
+                </div>
+                <div className="h-5 w-full bg-gray-200 rounded animate-pulse mb-1"></div>
+                <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="h-4 w-full bg-gray-100 rounded animate-pulse"></div>
+                <div className="h-4 w-5/6 bg-gray-100 rounded animate-pulse"></div>
+                <div className="h-4 w-4/6 bg-gray-100 rounded animate-pulse"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -267,8 +331,18 @@ export function DigestTab({
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <p className="text-gray-500">No digest available for this region.</p>
-          <Button onClick={onRefresh} variant="outline" className="mt-4">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
+            <svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Digest Available</h3>
+          <p className="text-gray-500 max-w-md mx-auto mb-6">
+            {trends.length === 0
+              ? 'Cairn is still gathering signals for this region. A digest will be generated once trend analysis is complete.'
+              : 'Generate a synthesized analysis of the current trends and signals.'}
+          </p>
+          <Button onClick={onRefresh} className="bg-blue-600 hover:bg-blue-700">
             Generate Digest
           </Button>
         </CardContent>

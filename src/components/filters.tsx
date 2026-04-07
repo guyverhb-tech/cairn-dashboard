@@ -76,7 +76,7 @@ const geographiesByRegion: Record<string, { value: string; label: string; isRegi
 const statusOptions = [
   { value: 'all', label: 'All Statuses' },
   { value: 'confirmed', label: 'Confirmed' },
-  { value: 'weakened', label: 'Weakened' },
+  { value: 'weakened', label: 'Under Review' },
 ];
 
 const timingOptions = [
@@ -139,11 +139,11 @@ export function DashboardFilters({ selectedRegion }: { selectedRegion: string })
 
   return (
     <div className="bg-white border rounded-lg p-4 mb-6">
-      <div className="flex flex-wrap items-end gap-4">
-        <div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="col-span-1">
           <label className="block text-xs font-medium text-gray-500 mb-1">Vertical</label>
           <Select value={currentVertical} onValueChange={(v) => updateFilter('vertical', v)}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="All Verticals" />
             </SelectTrigger>
             <SelectContent>
@@ -156,10 +156,10 @@ export function DashboardFilters({ selectedRegion }: { selectedRegion: string })
           </Select>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Region / Country</label>
+        <div className="col-span-1">
+          <label className="block text-xs font-medium text-gray-500 mb-1">Country</label>
           <Select value={currentGeography} onValueChange={(v) => updateFilter('geography', v)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="All Countries" />
             </SelectTrigger>
             <SelectContent>
@@ -172,10 +172,10 @@ export function DashboardFilters({ selectedRegion }: { selectedRegion: string })
           </Select>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Trend Status</label>
+        <div className="col-span-1">
+          <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
           <Select value={currentStatus} onValueChange={(v) => updateFilter('status', v)}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -188,10 +188,10 @@ export function DashboardFilters({ selectedRegion }: { selectedRegion: string })
           </Select>
         </div>
 
-        <div>
+        <div className="col-span-1">
           <label className="block text-xs font-medium text-gray-500 mb-1">Timing</label>
           <Select value={currentTiming} onValueChange={(v) => updateFilter('timing', v)}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="All Timing" />
             </SelectTrigger>
             <SelectContent>
@@ -204,10 +204,10 @@ export function DashboardFilters({ selectedRegion }: { selectedRegion: string })
           </Select>
         </div>
 
-        <div>
+        <div className="col-span-1">
           <label className="block text-xs font-medium text-gray-500 mb-1">Date Range</label>
           <Select value={currentDateRange} onValueChange={(v) => updateFilter('dateRange', v)}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="All Time" />
             </SelectTrigger>
             <SelectContent>
@@ -221,9 +221,11 @@ export function DashboardFilters({ selectedRegion }: { selectedRegion: string })
         </div>
 
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="mb-0.5">
-            Clear All
-          </Button>
+          <div className="col-span-1 flex items-end">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="w-full">
+              Clear All
+            </Button>
+          </div>
         )}
       </div>
 
