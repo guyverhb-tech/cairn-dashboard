@@ -122,3 +122,58 @@ export async function searchSignals(query: string, params?: {
 
   return fetchAPI(`/api/search?${searchParams.toString()}`);
 }
+
+// Digest types
+export type SignalQuality = 'strong' | 'moderate' | 'weak';
+
+export interface DigestCard {
+  vertical: 'finserv' | 'healthcare' | 'retail';
+  region: 'emea' | 'namer' | 'apj';
+  headline: string;
+  keyMovements: string[];
+  skepticSummary: string;
+  twilioRelevance: string;
+  signalQuality: SignalQuality;
+  trendCount: number;
+  underlyingTrendIds: string[];
+  generatedAt: string;
+}
+
+export interface RegionDigest {
+  region: 'emea' | 'namer' | 'apj';
+  cards: DigestCard[];
+  crossRegionPatterns?: string;
+  generatedAt: string;
+  expiresAt: string;
+}
+
+export interface IndustryBriefing {
+  content: string;
+  markdown: string;
+  generatedAt: string;
+  region: 'emea' | 'namer' | 'apj' | 'all';
+  wordCount: number;
+}
+
+export async function getDigest(region: string = 'all', refresh: boolean = false): Promise<{ digest: RegionDigest; cached: boolean }> {
+  const params = new URLSearchParams({ region });
+  if (refresh) params.set('refresh', '1');
+  return fetchAPI(`/api/digest?${params.toString()}`);
+}
+
+export async function generateBriefing(region: string = 'all'): Promise<IndustryBriefing> {
+  const res = await fetch(`${API_URL}/api/briefing`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ region }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status}`);
+  }
+
+  return res.json();
+}
