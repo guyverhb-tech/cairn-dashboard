@@ -23,8 +23,9 @@ export interface Signal {
   sourceName: string;
   sourceUrl: string;
   timestamp: string;
+  region: 'emea' | 'namer' | 'apj';
   vertical: 'finserv' | 'healthcare' | 'retail';
-  geography: 'uk' | 'france' | 'germany' | 'netherlands' | 'ireland' | 'switzerland' | 'spain' | 'italy' | 'sweden';
+  geography: 'uk' | 'france' | 'germany' | 'netherlands' | 'ireland' | 'switzerland' | 'spain' | 'italy' | 'sweden' | 'us' | 'canada' | 'mexico' | 'australia' | 'japan' | 'singapore' | 'india';
   signalType: string;
   title: string;
   summary?: string;
@@ -39,8 +40,10 @@ export interface Signal {
 
 export interface Trend {
   id: string;
+  region: 'emea' | 'namer' | 'apj';
   vertical: 'finserv' | 'healthcare' | 'retail';
-  geography: 'uk' | 'france' | 'germany' | 'netherlands' | 'ireland' | 'switzerland' | 'spain' | 'italy' | 'sweden';
+  geography: 'uk' | 'france' | 'germany' | 'netherlands' | 'ireland' | 'switzerland' | 'spain' | 'italy' | 'sweden' | 'us' | 'canada' | 'mexico' | 'australia' | 'japan' | 'singapore' | 'india';
+  crossRegion?: boolean;
   title: string;
   narrative: string;
   theme: string;
