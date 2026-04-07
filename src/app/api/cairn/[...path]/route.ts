@@ -87,3 +87,4 @@ export async function DELETE(
   const { path } = await params;
   return proxyRequest(request, path);
 }
+// Deployed: 2026-04-07T19:44:54Z
