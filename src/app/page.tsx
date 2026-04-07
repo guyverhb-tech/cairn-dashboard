@@ -105,9 +105,15 @@ export default async function Dashboard({
     filteredSignals = filteredSignals.filter(s => s.vertical === selectedVertical);
   }
 
-  // Geography filter
+  // Geography filter (supports both individual countries and region: prefix)
   if (selectedGeography !== 'all') {
-    filteredSignals = filteredSignals.filter(s => s.geography === selectedGeography);
+    if (selectedGeography.startsWith('region:')) {
+      const filterRegion = selectedGeography.replace('region:', '');
+      const regionGeos = regionCountries[filterRegion] || [];
+      filteredSignals = filteredSignals.filter(s => regionGeos.includes(s.geography));
+    } else {
+      filteredSignals = filteredSignals.filter(s => s.geography === selectedGeography);
+    }
   }
 
   // Date range filter
@@ -128,9 +134,15 @@ export default async function Dashboard({
     filteredTrends = filteredTrends.filter(t => t.vertical === selectedVertical);
   }
 
-  // Geography filter
+  // Geography filter (supports both individual countries and region: prefix)
   if (selectedGeography !== 'all') {
-    filteredTrends = filteredTrends.filter(t => t.geography === selectedGeography);
+    if (selectedGeography.startsWith('region:')) {
+      const filterRegion = selectedGeography.replace('region:', '');
+      const regionGeos = regionCountries[filterRegion] || [];
+      filteredTrends = filteredTrends.filter(t => regionGeos.includes(t.geography));
+    } else {
+      filteredTrends = filteredTrends.filter(t => t.geography === selectedGeography);
+    }
   }
 
   // Status filter

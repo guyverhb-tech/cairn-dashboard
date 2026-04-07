@@ -19,9 +19,14 @@ const verticals = [
   { value: 'retail', label: 'Retail' },
 ];
 
-const geographiesByRegion: Record<string, { value: string; label: string }[]> = {
+const geographiesByRegion: Record<string, { value: string; label: string; isRegion?: boolean }[]> = {
   all: [
     { value: 'all', label: 'All Countries' },
+    // Regions
+    { value: 'region:emea', label: 'EMEA (All)', isRegion: true },
+    { value: 'region:namer', label: 'NAMER (All)', isRegion: true },
+    { value: 'region:apj', label: 'APJ (All)', isRegion: true },
+    // EMEA Countries
     { value: 'uk', label: 'UK' },
     { value: 'france', label: 'France' },
     { value: 'germany', label: 'Germany' },
@@ -31,9 +36,11 @@ const geographiesByRegion: Record<string, { value: string; label: string }[]> = 
     { value: 'spain', label: 'Spain' },
     { value: 'italy', label: 'Italy' },
     { value: 'sweden', label: 'Sweden' },
+    // NAMER Countries
     { value: 'us', label: 'United States' },
     { value: 'canada', label: 'Canada' },
     { value: 'mexico', label: 'Mexico' },
+    // APJ Countries
     { value: 'australia', label: 'Australia' },
     { value: 'japan', label: 'Japan' },
     { value: 'singapore', label: 'Singapore' },
