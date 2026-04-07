@@ -2,6 +2,7 @@ import { getSignalStats, getTrendStats, getSignals, getTrends } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { DashboardTabs } from '@/components/dashboard-tabs';
+import { DashboardFilters } from '@/components/filters';
 
 // Country code to short label mapping
 const countryLabels: Record<string, string> = {
@@ -46,29 +47,106 @@ function sumStats(stats: Record<string, number> | undefined, region: string): nu
   return countries.reduce((sum, country) => sum + (stats[country] || 0), 0);
 }
 
+interface SearchParams {
+  region?: string;
+  vertical?: string;
+  geography?: string;
+  status?: string;
+  timing?: string;
+  dateRange?: string;
+}
+
+function getDateRangeFilter(dateRange: string): Date | undefined {
+  const now = new Date();
+  switch (dateRange) {
+    case '7d':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '30d':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case '90d':
+      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    default:
+      return undefined;
+  }
+}
+
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ region?: string }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
   const selectedRegion = params.region || 'all';
+  const selectedVertical = params.vertical || 'all';
+  const selectedGeography = params.geography || 'all';
+  const selectedStatus = params.status || 'all';
+  const selectedTiming = params.timing || 'all';
+  const selectedDateRange = params.dateRange || 'all';
 
   const [signalStats, trendStats, signalsData, trendsData] = await Promise.all([
     getSignalStats(),
     getTrendStats(),
-    getSignals({ limit: 50 }),
+    getSignals({ limit: 100 }),
     getTrends(),
   ]);
 
-  // Filter data by region if selected (default to emea for legacy signals without region)
-  const filteredSignals = selectedRegion === 'all'
-    ? signalsData.signals
-    : signalsData.signals.filter(s => (s.region || 'emea') === selectedRegion);
+  const dateFilter = getDateRangeFilter(selectedDateRange);
 
-  const filteredTrends = selectedRegion === 'all'
-    ? trendsData.trends
-    : trendsData.trends.filter(t => (t.region || 'emea') === selectedRegion || t.crossRegion);
+  // Filter signals
+  let filteredSignals = signalsData.signals;
+
+  // Region filter
+  if (selectedRegion !== 'all') {
+    filteredSignals = filteredSignals.filter(s => (s.region || 'emea') === selectedRegion);
+  }
+
+  // Vertical filter
+  if (selectedVertical !== 'all') {
+    filteredSignals = filteredSignals.filter(s => s.vertical === selectedVertical);
+  }
+
+  // Geography filter
+  if (selectedGeography !== 'all') {
+    filteredSignals = filteredSignals.filter(s => s.geography === selectedGeography);
+  }
+
+  // Date range filter
+  if (dateFilter) {
+    filteredSignals = filteredSignals.filter(s => new Date(s.timestamp) >= dateFilter);
+  }
+
+  // Filter trends
+  let filteredTrends = trendsData.trends;
+
+  // Region filter
+  if (selectedRegion !== 'all') {
+    filteredTrends = filteredTrends.filter(t => (t.region || 'emea') === selectedRegion || t.crossRegion);
+  }
+
+  // Vertical filter
+  if (selectedVertical !== 'all') {
+    filteredTrends = filteredTrends.filter(t => t.vertical === selectedVertical);
+  }
+
+  // Geography filter
+  if (selectedGeography !== 'all') {
+    filteredTrends = filteredTrends.filter(t => t.geography === selectedGeography);
+  }
+
+  // Status filter
+  if (selectedStatus !== 'all') {
+    filteredTrends = filteredTrends.filter(t => t.status === selectedStatus);
+  }
+
+  // Timing filter
+  if (selectedTiming !== 'all') {
+    filteredTrends = filteredTrends.filter(t => t.timingAssessment === selectedTiming);
+  }
+
+  // Date range filter
+  if (dateFilter) {
+    filteredTrends = filteredTrends.filter(t => new Date(t.detectedAt) >= dateFilter);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -128,6 +206,9 @@ export default async function Dashboard({
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Filters */}
+        <DashboardFilters selectedRegion={selectedRegion} />
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <Card>
