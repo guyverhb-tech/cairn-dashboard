@@ -1,15 +1,32 @@
-// Use local proxy to avoid mixed content issues (HTTPS dashboard -> HTTP API)
-// The proxy at /api/cairn forwards to the actual Cairn API server
-const API_BASE = '/api/cairn';
+// Server-side: call Cairn API directly (no mixed content issue server-to-server)
+// Client-side: use proxy to avoid mixed content (HTTPS page -> HTTP API)
+const CAIRN_API_URL = process.env.CAIRN_API_URL || 'http://178.104.117.204:3001';
+const CAIRN_API_KEY = process.env.CAIRN_API_KEY || '';
+
+function getBaseUrl(): string {
+  // Server-side: call Cairn API directly
+  if (typeof window === 'undefined') {
+    return CAIRN_API_URL;
+  }
+  // Client-side: use proxy (would need to be implemented for client fetches)
+  return '';
+}
 
 async function fetchAPI<T>(endpoint: string): Promise<T> {
-  // endpoint comes as /api/signals, we need /api/cairn/signals
-  const proxyPath = endpoint.replace(/^\/api/, API_BASE);
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}${endpoint}`;
 
-  const res = await fetch(proxyPath, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  // Add auth header for server-side calls
+  if (typeof window === 'undefined' && CAIRN_API_KEY) {
+    headers['Authorization'] = `Bearer ${CAIRN_API_KEY}`;
+  }
+
+  const res = await fetch(url, {
+    headers,
     next: { revalidate: 60 }, // Cache for 60 seconds
   });
 
@@ -165,11 +182,18 @@ export async function getDigest(region: string = 'all', refresh: boolean = false
 }
 
 export async function generateBriefing(region: string = 'all'): Promise<IndustryBriefing> {
-  const res = await fetch(`${API_BASE}/briefing`, {
+  const baseUrl = getBaseUrl();
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (typeof window === 'undefined' && CAIRN_API_KEY) {
+    headers['Authorization'] = `Bearer ${CAIRN_API_KEY}`;
+  }
+
+  const res = await fetch(`${baseUrl}/api/briefing`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({ region }),
   });
 
