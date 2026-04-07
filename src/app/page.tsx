@@ -20,7 +20,14 @@ function formatDate(dateString: string) {
   });
 }
 
-function RegionBadge({ region }: { region: string }) {
+function RegionBadge({ region }: { region?: string }) {
+  if (!region) {
+    return (
+      <Badge variant="outline" className="bg-gray-100 text-gray-600">
+        EMEA
+      </Badge>
+    );
+  }
   const colors: Record<string, string> = {
     emea: 'bg-indigo-100 text-indigo-800',
     namer: 'bg-orange-100 text-orange-800',
@@ -116,14 +123,14 @@ export default async function Dashboard({
     getTrends(),
   ]);
 
-  // Filter data by region if selected
+  // Filter data by region if selected (default to emea for legacy signals without region)
   const filteredSignals = selectedRegion === 'all'
     ? signalsData.signals
-    : signalsData.signals.filter(s => s.region === selectedRegion);
+    : signalsData.signals.filter(s => (s.region || 'emea') === selectedRegion);
 
   const filteredTrends = selectedRegion === 'all'
     ? trendsData.trends
-    : trendsData.trends.filter(t => t.region === selectedRegion || t.crossRegion);
+    : trendsData.trends.filter(t => (t.region || 'emea') === selectedRegion || t.crossRegion);
 
   return (
     <div className="min-h-screen bg-gray-50">
