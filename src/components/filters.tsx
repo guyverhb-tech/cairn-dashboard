@@ -139,76 +139,89 @@ export function DashboardFilters({ selectedRegion }: { selectedRegion: string })
 
   return (
     <div className="bg-white border rounded-lg p-4 mb-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm font-medium text-gray-700">Filters:</span>
+      <div className="flex flex-wrap items-end gap-4">
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Vertical</label>
+          <Select value={currentVertical} onValueChange={(v) => updateFilter('vertical', v)}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="All Verticals" />
+            </SelectTrigger>
+            <SelectContent>
+              {verticals.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select value={currentVertical} onValueChange={(v) => updateFilter('vertical', v)}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Vertical" />
-          </SelectTrigger>
-          <SelectContent>
-            {verticals.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Region / Country</label>
+          <Select value={currentGeography} onValueChange={(v) => updateFilter('geography', v)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Countries" />
+            </SelectTrigger>
+            <SelectContent>
+              {geographies.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select value={currentGeography} onValueChange={(v) => updateFilter('geography', v)}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Geography" />
-          </SelectTrigger>
-          <SelectContent>
-            {geographies.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Trend Status</label>
+          <Select value={currentStatus} onValueChange={(v) => updateFilter('status', v)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select value={currentStatus} onValueChange={(v) => updateFilter('status', v)}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Timing</label>
+          <Select value={currentTiming} onValueChange={(v) => updateFilter('timing', v)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Timing" />
+            </SelectTrigger>
+            <SelectContent>
+              {timingOptions.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select value={currentTiming} onValueChange={(v) => updateFilter('timing', v)}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Timing" />
-          </SelectTrigger>
-          <SelectContent>
-            {timingOptions.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={currentDateRange} onValueChange={(v) => updateFilter('dateRange', v)}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Date Range" />
-          </SelectTrigger>
-          <SelectContent>
-            {dateRangeOptions.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Date Range</label>
+          <Select value={currentDateRange} onValueChange={(v) => updateFilter('dateRange', v)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Time" />
+            </SelectTrigger>
+            <SelectContent>
+              {dateRangeOptions.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="mb-0.5">
             Clear All
           </Button>
         )}
