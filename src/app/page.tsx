@@ -37,6 +37,12 @@ function GeographyBadge({ geography }: { geography: string }) {
     uk: '🇬🇧',
     france: '🇫🇷',
     germany: '🇩🇪',
+    netherlands: '🇳🇱',
+    ireland: '🇮🇪',
+    switzerland: '🇨🇭',
+    spain: '🇪🇸',
+    italy: '🇮🇹',
+    sweden: '🇸🇪',
   };
   return (
     <Badge variant="secondary">
