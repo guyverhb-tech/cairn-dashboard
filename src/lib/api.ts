@@ -1,10 +1,13 @@
-const API_URL = process.env.NEXT_PUBLIC_CAIRN_API_URL || 'http://178.104.117.204:3001';
-const API_KEY = process.env.CAIRN_API_KEY || '';
+// Use local proxy to avoid mixed content issues (HTTPS dashboard -> HTTP API)
+// The proxy at /api/cairn forwards to the actual Cairn API server
+const API_BASE = '/api/cairn';
 
 async function fetchAPI<T>(endpoint: string): Promise<T> {
-  const res = await fetch(`${API_URL}${endpoint}`, {
+  // endpoint comes as /api/signals, we need /api/cairn/signals
+  const proxyPath = endpoint.replace(/^\/api/, API_BASE);
+
+  const res = await fetch(proxyPath, {
     headers: {
-      'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json',
     },
     next: { revalidate: 60 }, // Cache for 60 seconds
@@ -162,10 +165,9 @@ export async function getDigest(region: string = 'all', refresh: boolean = false
 }
 
 export async function generateBriefing(region: string = 'all'): Promise<IndustryBriefing> {
-  const res = await fetch(`${API_URL}/api/briefing`, {
+  const res = await fetch(`${API_BASE}/briefing`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ region }),
