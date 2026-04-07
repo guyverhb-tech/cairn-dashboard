@@ -3,32 +3,36 @@
 const CAIRN_API_URL = process.env.CAIRN_API_URL || 'http://178.104.117.204:3001';
 const CAIRN_API_KEY = process.env.CAIRN_API_KEY || '';
 
-function getBaseUrl(): string {
-  // Server-side: call Cairn API directly
-  if (typeof window === 'undefined') {
-    return CAIRN_API_URL;
-  }
-  // Client-side: use proxy (would need to be implemented for client fetches)
-  return '';
+function isServer(): boolean {
+  return typeof window === 'undefined';
 }
 
 async function fetchAPI<T>(endpoint: string): Promise<T> {
-  const baseUrl = getBaseUrl();
-  const url = `${baseUrl}${endpoint}`;
-
+  let url: string;
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
 
-  // Add auth header for server-side calls
-  if (typeof window === 'undefined' && CAIRN_API_KEY) {
-    headers['Authorization'] = `Bearer ${CAIRN_API_KEY}`;
+  if (isServer()) {
+    // Server-side: call Cairn API directly
+    url = `${CAIRN_API_URL}${endpoint}`;
+    if (CAIRN_API_KEY) {
+      headers['Authorization'] = `Bearer ${CAIRN_API_KEY}`;
+    }
+  } else {
+    // Client-side: use proxy to avoid mixed content
+    // /api/signals -> /api/cairn/signals
+    url = endpoint.replace(/^\/api/, '/api/cairn');
   }
 
-  const res = await fetch(url, {
-    headers,
-    next: { revalidate: 60 }, // Cache for 60 seconds
-  });
+  const fetchOptions: RequestInit = { headers };
+
+  // Only use next.revalidate on server-side
+  if (isServer()) {
+    (fetchOptions as any).next = { revalidate: 60 };
+  }
+
+  const res = await fetch(url, fetchOptions);
 
   if (!res.ok) {
     throw new Error(`API error: ${res.status}`);
@@ -182,16 +186,22 @@ export async function getDigest(region: string = 'all', refresh: boolean = false
 }
 
 export async function generateBriefing(region: string = 'all'): Promise<IndustryBriefing> {
-  const baseUrl = getBaseUrl();
+  let url: string;
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
 
-  if (typeof window === 'undefined' && CAIRN_API_KEY) {
-    headers['Authorization'] = `Bearer ${CAIRN_API_KEY}`;
+  if (isServer()) {
+    url = `${CAIRN_API_URL}/api/briefing`;
+    if (CAIRN_API_KEY) {
+      headers['Authorization'] = `Bearer ${CAIRN_API_KEY}`;
+    }
+  } else {
+    // Client-side: use proxy
+    url = '/api/cairn/briefing';
   }
 
-  const res = await fetch(`${baseUrl}/api/briefing`, {
+  const res = await fetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify({ region }),
